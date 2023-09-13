@@ -1,22 +1,23 @@
 # Snake: The Game
-A snake that eats food. Made with pure JS (canvas). Responsive (done). Eventually touch controls (wait one sec, that's easy actually).
+A snake that eats food. Made with pure JS (canvas). Responsive (done). Touch controls - swipe (done)
 
-Not sure when I'll work on this.
+Not sure when I'll finish this.
 
 Basic Features
-- Arrow Keys to move or snake will automove
+- Arrow Keys to move or snake will automove (Done)
 - Food spawns at a random location
-- Eat the food
+- Eat the food and grow
 - Lose by
-  - Crashing into side
+  - Crashing into side (done)
   - Crashing into yourself
   - Going backwards (Currently doesn't move you backwards, but doesn't kill you).
-- Responsive
+- Responsive (Done)
+- Touch Controls (Done)
 
 Future Features:
-- Touch Controls
 - Local two player (WASD)
-- Full screen, remove square game shape requirement
+- More screen, remove square game shape requirement.
 
 Issues
-- Using timers. Should transition to something else. requestAnimationFrame?
+- Using timers. Should use something else. requestAnimationFrame?
+- Need to make the game show a message and restart when the game ends. Maybe a menu.
