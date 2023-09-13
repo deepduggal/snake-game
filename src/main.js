@@ -318,13 +318,6 @@ class Game {
     this.canvas.height = smallerOfHeightWidth;
     this.canvas.width = smallerOfHeightWidth;
 
-    // TODO: Set values of a background image
-    // Set the canvas styles
-    this.canvas.style.display = 'block';
-    this.canvas.style.margin = '0 auto';
-    this.canvas.style.background = '#9C27B0';
-
-
     // Set GameMap values
     // 2D Coordinate System: Set the number of rows and columns
     this._rows = 10; // Keep _rows and _cols the same, for square game
