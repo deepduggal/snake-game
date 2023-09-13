@@ -1,5 +1,7 @@
 # Snake: The Game
-A snake that eats food. Made with pure JS (canvas). Responsive w/ swipe controls.
+A snake that eats food. Made with JS (canvas & no libraries). Responsive w/ swipe controls.
+
+Play Now: [Snake Game](https://deepduggal.github.io/snake-game/src/index.html)
 
 
 ## Features
