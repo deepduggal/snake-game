@@ -111,9 +111,6 @@ class GameObject {
   }
 
   add() {
-    // Remove old GameObject, if it's on canvas
-    this.remove();
-
     if (!this._isOnCanvas) {
       // Style the GameObject
       this.game.ctx.fillStyle = this.color;
@@ -149,13 +146,10 @@ class GameObject {
     this.redraw(() => {
       this.x = this.game.colSize * Math.floor(this.x / this.game.colSize);
       this.y = this.game.rowSize * Math.floor(this.y / this.game.rowSize);
+      this.width = this.game.colSize;
+      this.height = this.game.rowSize;
     });
   }
-
-  // // Check if instance collided with another game object
-  // didCollide(otherGameObject) {
-  //   return Collisions.didCollide(this, otherGameObject);
-  // }
 }
 
 // TODO: Snake extends Player
@@ -183,9 +177,9 @@ class Snake extends GameObject {
     this.direction = 'down'; // The snake's current direction
     this.horizontalMoveAmt = game.colSize; // The amount the snake moves horizontally
     this.verticalMoveAmt = game.rowSize; // The amount the snake moves vertically
-    // this.length = 1; // The snake's length
+    this.length = 1; // The snake's length
 
-    ClassUtils.bindMethods(['onKeyDown', 'onSwipe', 'move', 'continue', 'eat', 'grow'], this);
+    ClassUtils.bindMethods(['onKeyDown', 'onSwipe', 'onResize', 'move', 'continue', 'eat', 'grow'], this);
   }
 
   // Remove and re-add snake from game
@@ -243,6 +237,7 @@ class Snake extends GameObject {
   grow() {
     // TODO: Do something if the snake eats food and grows
     this.length++;
+    console.log(this.length);
   }
 
   onSwipe(direction) {
@@ -267,24 +262,42 @@ class Snake extends GameObject {
         break;
     }
   }
+
+  onResize(e) {
+    this.redraw(() => {
+      this.x = this.game.colSize * Math.floor(this.x / this.game.colSize);
+      this.y = this.game.rowSize * Math.floor(this.y / this.game.rowSize);
+      this.height = this.game.rowSize;
+      this.width = this.game.colSize;
+    });
+  }
 }
 class Food extends GameObject {
-  constructor(game, styles = { color: '#fff' }) {
+  constructor(game, styles = { color: '#ffffff' }) {
     const width = game.rowSize;
     const height = game.colSize;
-    const randomX = limitNum(game.colSize * Math.floor(Math.random() * game.cols, 0, game.width - width));
+    const randomX = limitNum(game.colSize * Math.floor(Math.random() * game.cols), 0, game.width - width);
     const randomY = limitNum(game.rowSize * Math.floor(Math.random() * game.rows), 0, game.height - height);
 
     super(game, randomX, randomY, height, width, styles);
 
     this.isEaten = false;
 
-    ClassUtils.bindMethods(['becomeEaten'], this);
+    ClassUtils.bindMethods(['becomeEaten', 'onResize'], this);
   }
 
   becomeEaten() {
     this.isEaten = true;
     this.game.removeFood(this);
+  }
+
+  onResize(e) {
+    this.redraw(() => {
+      this.x = this.game.colSize * Math.floor(this.x / this.game.colSize);
+      this.y = this.game.rowSize * Math.floor(this.y / this.game.rowSize);
+      this.height = this.game.rowSize;
+      this.width = this.game.colSize;
+    });
   }
 }
 
@@ -301,7 +314,7 @@ class Game {
 
     // Set the canvas height and width
     const containerRect = this.container.getBoundingClientRect();
-    const smallerOfHeightWidth = Math.min(containerRect.height, containerRect.width); // Square game, not rectangle
+    const smallerOfHeightWidth = Math.floor(Math.min(containerRect.height, containerRect.width)); // Square game, not rectangle
     this.canvas.height = smallerOfHeightWidth;
     this.canvas.width = smallerOfHeightWidth;
 
@@ -316,8 +329,8 @@ class Game {
     // 2D Coordinate System: Set the number of rows and columns
     this._rows = 10; // Keep _rows and _cols the same, for square game
     this._cols = 10;
-    this.rowSize = this.width / this._rows;
-    this.colSize = this.height / this._cols;
+    this.rowSize = Math.floor(this.width / this._rows);
+    this.colSize = Math.floor(this.height / this._cols);
     // this.cellSize
 
     // Customize game values (ex. speed)
@@ -337,7 +350,7 @@ class Game {
 
     // Bind this for class methods
     ClassUtils.bindMethods(['_onGestureStart', '_onGestureEnd', '_onResize', '_onKeyDown', '_addEventListeners',
-      'init', 'start', 'stop', 'updateGame',
+      'init', 'startGameLoop', 'stopGameLoop', 'updateGame',
       'gameOver', 'spawnFood', 'addFood', 'removeFood', 'handlePlayerCollisions'], this);
   }
 
@@ -352,7 +365,7 @@ class Game {
     this.container.appendChild(this.canvas);
   }
 
-  // Initialize the game. Use game.start() to start the game.
+  // Initialize the game.
   init() {
     // Add player 1 to canvas
     this._players[0].add(0, 0);
@@ -362,7 +375,7 @@ class Game {
     this._addEventListeners();
   }
   // Start the game
-  start() {
+  startGameLoop() {
     // TODO: Use requestAnimationFrame(), not a timer.
     // TODO: Use setInterval, but fix the player going off-screen first
     // TODO: Should clearInterval
@@ -370,7 +383,7 @@ class Game {
     this._gameLoopTimer = setInterval(this.updateGame, this.opts.speed);
   }
   // Stop the game
-  stop() {
+  stopGameLoop() {
     // Stop the game loop
     if (this._gameLoopTimer !== null) {
       clearInterval(this._gameLoopTimer);
@@ -381,18 +394,20 @@ class Game {
   handlePlayerCollisions() {
     this._players.forEach((player) => {
       const foodsPlayerCollidedWith = Collisions.collidedWith(player, this._foods);
+
       // Player collided with wall
       if (Collisions.didCollideWithWall(this, player)) {
         console.log('Wall collision!')
         // player.kill();
-        // Game over
         this.gameOver();
       }
+
       // TODO: Player collided with self
       // else if () {
 
       // }
-      // Check if player collided with 1 or more foods
+
+      // Check if player collided with any foods
       else if (foodsPlayerCollidedWith.length > 0) {
         foodsPlayerCollidedWith.forEach(food => {
           player.eat(food);
@@ -408,15 +423,8 @@ class Game {
   }
   // Specify the game loop. Auto update values here.
   updateGame() {
-    // Check for collisions
-    this.handlePlayerCollisions();
-
-    // TODO: Spawn food if needed
-
-    // At end
     if (!this._isGameOver) {
-      // TODO: Add winning
-
+      this.handlePlayerCollisions();
     } else {
       // Game over
       this.gameOver();
@@ -424,9 +432,9 @@ class Game {
   }
 
   spawnFood() {
-    console.log('spawnFood');
-    if (this._foods.length < 2) {
+    if (this._foods.length === 0) {
       this.addFood();
+      console.log('spawnFood', this._foods);
     }
   }
 
@@ -443,8 +451,9 @@ class Game {
   }
 
   gameOver() {
-    this._isGameOver = true;
     console.log('Game Over!');
+    this._isGameOver = true;
+    this.stopGameLoop();
   }
 
   /** Event Handlers */
@@ -500,31 +509,37 @@ class Game {
 
   // }
   _onKeyDown(e) {
-    // Call each player's keydown method
-    // TODO: When canvas is focused, e.preventDefault()e.stopPropagation();
-    this._players.forEach(player => {
-      player.onKeyDown(e);
-    });
+    if (!this._isGameOver) {
+      e.preventDefault();
+      // Call each player's keydown method
+      // TODO: When canvas is focused, e.preventDefault()e.stopPropagation();
+      this._players.forEach(player => {
+        player.onKeyDown(e);
+      });
+    }
   }
   _onResize(e) {
     // Resize the canvas
     const containerRect = this.container.getBoundingClientRect();
-    const smallerOfHeightWidth = Math.min(containerRect.height, containerRect.width); // Square game, not rectangle
+    const smallerOfHeightWidth = Math.floor(Math.min(containerRect.height, containerRect.width)); // Square game, not rectangle
     this.canvas.height = smallerOfHeightWidth;
     this.canvas.width = smallerOfHeightWidth;
 
     // TODO: Update game coordinate system
-    this.rowSize = this.width / this._rows;
-    this.colSize = this.height / this._cols;
+    this.rowSize = Math.floor(this.width / this._rows);
+    this.colSize = Math.floor(this.height / this._cols);
 
     // Redraw all GameObjects that are on the canvas
     this._players.forEach(player => {
       player.onResize(e);
     });
+    this._foods.forEach(food => {
+      food.onResize(e);
+    });
   }
   _addEventListeners() {
     // Keyboard
-    this.canvas.addEventListener('keydown', this._onKeyDown, false);
+    document.body.addEventListener('keydown', this._onKeyDown, false);
 
     // Touch
     this.canvas.addEventListener('touchstart', this._onGestureStart, true);
@@ -540,7 +555,9 @@ class Game {
 
 // Event Listeners
 document.body.addEventListener('DOMContentLoaded', function (e) {
+  // Set the font
   ctx.font = '48px Montserrat';
+  // Back-up Text
   ctx.fillText('Snake', 10, 50);
 }, false);
 
@@ -548,5 +565,5 @@ document.body.addEventListener('DOMContentLoaded', function (e) {
 window.addEventListener('load', function () {
   const game = new Game('#game-container');
   game.init();
-  game.start();
+  game.startGameLoop();
 }, false);
