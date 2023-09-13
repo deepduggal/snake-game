@@ -185,7 +185,7 @@ class Snake extends GameObject {
     this.verticalMoveAmt = game.rowSize; // The amount the snake moves vertically
     // this.length = 1; // The snake's length
 
-    ClassUtils.bindMethods(['onKeyDown', 'move', 'continue', 'eat', 'grow'], this);
+    ClassUtils.bindMethods(['onKeyDown', 'onSwipe', 'move', 'continue', 'eat', 'grow'], this);
   }
 
   // Remove and re-add snake from game
@@ -243,6 +243,10 @@ class Snake extends GameObject {
   grow() {
     // TODO: Do something if the snake eats food and grows
     this.length++;
+  }
+
+  onSwipe(direction) {
+    this.move(direction);
   }
 
   onKeyDown(e) {
@@ -325,8 +329,14 @@ class Game {
     this._foods = [];
     this._isGameOver = false;
 
+    // Events
+    this._touchData = {
+      startX: 0,
+      startY: 0
+    };
+
     // Bind this for class methods
-    ClassUtils.bindMethods(['_onResize', '_onKeyDown', '_addEventListeners',
+    ClassUtils.bindMethods(['_onGestureStart', '_onGestureEnd', '_onResize', '_onKeyDown', '_addEventListeners',
       'init', 'start', 'stop', 'updateGame',
       'gameOver', 'spawnFood', 'addFood', 'removeFood', 'handlePlayerCollisions'], this);
   }
@@ -409,7 +419,7 @@ class Game {
 
     } else {
       // Game over
-      // this.gameOver();
+      this.gameOver();
     }
   }
 
@@ -422,10 +432,10 @@ class Game {
 
   addFood() {
     const food = new Food(this);
-    // Add food to game
-    this._foods.push(food);
     // Add food to canvas
     food.add();
+    // Add food to game
+    this._foods.push(food);
   }
   removeFood(foodToRemove) {
     foodToRemove.remove();
@@ -438,6 +448,57 @@ class Game {
   }
 
   /** Event Handlers */
+  _onGestureStart(e) {
+    e.preventDefault();
+
+    // if (e.touches && e.touches.length > 1) {
+    //   return;
+    // }
+
+    // Store touch start
+    this._touchData = {
+      startX: e.touches[0].clientX,
+      startY: e.touches[0].clientY
+    };
+  }
+  _onGestureEnd(e) {
+    let touchEndX = e.changedTouches[0].clientX;
+    let touchEndY = e.changedTouches[0].clientY;
+
+    let deltaX = touchEndX - this._touchData.startX;
+    let deltaY = touchEndY - this._touchData.startY;
+
+    // Determine the direction of the swipe
+    let swipeDirection;
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        swipeDirection = 'right';
+      } else {
+        swipeDirection = 'left';
+      }
+    } else {
+      if (deltaY > 0) {
+        swipeDirection = 'down';
+      } else {
+        swipeDirection = 'up';
+      }
+    }
+
+    // 1st player swipe controls
+    this._players[0].onSwipe(swipeDirection);
+
+    // Reset touch data
+    this._touchData = {
+      startX: 0,
+      startY: 0
+    };
+  }
+  // _onGestureMove(e) {
+
+  // }
+  // _onGestureCancel(e) {
+
+  // }
   _onKeyDown(e) {
     // Call each player's keydown method
     // TODO: When canvas is focused, e.preventDefault()e.stopPropagation();
@@ -462,19 +523,26 @@ class Game {
     });
   }
   _addEventListeners() {
-    // Add controls for players
-    window.addEventListener('keydown', this._onKeyDown, false);
+    // Keyboard
+    this.canvas.addEventListener('keydown', this._onKeyDown, false);
+
+    // Touch
+    this.canvas.addEventListener('touchstart', this._onGestureStart, true);
+    // this.canvas.addEventListener('pointermove', this.handleGestureMove, true);
+    this.canvas.addEventListener('touchend', this._onGestureEnd, true);
+    // this.canvas.addEventListener('pointercancel', this.handleGestureEnd, true);
+
 
     // Add event listener to resize the canvas when the window size changes
     window.addEventListener('resize', this._onResize, false);
   }
 }
 
-// // Event Listeners
-// document.body.addEventListener('DOMContentLoaded', function (e) {
-//   ctx.font = '48px Montserrat';
-//   ctx.fillText('Snake', 10, 50);
-// }, false);
+// Event Listeners
+document.body.addEventListener('DOMContentLoaded', function (e) {
+  ctx.font = '48px Montserrat';
+  ctx.fillText('Snake', 10, 50);
+}, false);
 
 // Init
 window.addEventListener('load', function () {
@@ -482,19 +550,3 @@ window.addEventListener('load', function () {
   game.init();
   game.start();
 }, false);
-
-/*TO DO: 
-  - Handle collision of snake to wall, food, or itself
-  - Add move(direction) handler and event listener
-  - Food.add(), Snake.move(), Snake.grow(),
-*/
-
-// Checks if an item is postioned outside of the canvas
-function willBeOutside(game, gameObject) {
-
-}
-function didCollide(game, a, b) {
-  // Is player within canvas
-
-  //
-}
