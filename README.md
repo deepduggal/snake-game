@@ -1,5 +1,5 @@
-# snake-game
-A snake that eats food. Made with pure JS (canvas). Responsive.
+# Snake: The Game
+A snake that eats food. Made with pure JS (canvas). Responsive (done). Eventually touch controls (wait one sec, that's easy actually).
 
 Not sure when I'll work on this.
 
