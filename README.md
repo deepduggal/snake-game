@@ -1,10 +1,9 @@
 # Snake: The Game
-A snake that eats food. Made with pure JS (canvas). Responsive (done). Touch controls - swipe (done)
+A snake that eats food. Made with pure JS (canvas). Responsive w/ swipe controls.
 
-Not sure when I'll finish this.
 
 ## Features
-- Arrow Keys to move or snake will automove (Done)
+- Arrow keys to move or snake will automove (Done)
 - Food spawns at a random location
 - Eat the food and grow
 - Lose by
