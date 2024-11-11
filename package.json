@@ -1,0 +1,20 @@
+{
+  "scripts": {
+    "build": "webpack && cp ./src/*.html ./dist && cp ./src/*.css ./dist",
+    "dev": "webpack --watch",
+    "test": "jest --watchAll"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.2",
+    "@babel/preset-env": "^7.23.2",
+    "@babel/preset-typescript": "^7.23.2",
+    "@types/jest": "^29.5.6",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "ts-loader": "^9.5.1",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "typescript": "^5.2.2",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
