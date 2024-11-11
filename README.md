@@ -3,7 +3,6 @@ A snake that eats food. Made with JS (canvas & no libraries). Responsive w/ swip
 
 Play Now: [Snake Game](https://deepduggal.github.io/snake-game/src/index.html)
 
-
 ## Features
 - Arrow keys to move or snake will automove (Done)
 - Food spawns at a random location
