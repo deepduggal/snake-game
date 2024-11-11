@@ -20,5 +20,9 @@ Play Now: [Snake Game](https://deepduggal.github.io/snake-game/src/index.html)
 - More screen, remove square game shape requirement.
 
 ### Issues
+- Can't move up
+- Game over happens a few steps after player is off screen.
+- Two yellow squares shown when food is eaten
+
 - Using timers. Should use something else. requestAnimationFrame?
-- Need to make the game show a message and restart when the game ends. Maybe a menu.
+- Need to make the game show a message and restart when the game ends (currently some console logs). Maybe a menu.
