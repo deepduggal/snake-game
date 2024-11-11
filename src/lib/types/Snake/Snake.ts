@@ -1,0 +1,1 @@
+export type SnakeDirection = 'up' | 'right' | 'down' | 'left';
